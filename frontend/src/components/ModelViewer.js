@@ -190,21 +190,26 @@ function Model3D({ modelUrl }) {
     return null;
 }
 
-// Test cube for debugging Three.js rendering
+// Test cube for debugging Three.js rendering with hologram effects
 function TestCube() {
     const meshRef = useRef();
+    const [material] = useState(() => createHologramMaterial());
     
-    useFrame(() => {
+    useFrame((state) => {
         if (meshRef.current) {
             meshRef.current.rotation.x += 0.01;
             meshRef.current.rotation.y += 0.01;
+            
+            // Animate hologram shader
+            if (meshRef.current.material && meshRef.current.material.uniforms) {
+                meshRef.current.material.uniforms.time.value = state.clock.elapsedTime;
+            }
         }
     });
 
     return (
-        <mesh ref={meshRef} position={[0, 0, 0]}>
+        <mesh ref={meshRef} position={[0, 0, 0]} material={material}>
             <boxGeometry args={[2, 2, 2]} />
-            <meshPhongMaterial color={0x00ffff} />
         </mesh>
     );
 }
