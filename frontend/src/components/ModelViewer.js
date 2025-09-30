@@ -4,6 +4,44 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader';
 import * as THREE from 'three';
 
+// Error boundary component for debugging
+class ErrorBoundary extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = { hasError: false, error: null };
+    }
+    
+    static getDerivedStateFromError(error) {
+        return { hasError: true, error };
+    }
+    
+    componentDidCatch(error, errorInfo) {
+        console.error('🚨 [ModelViewer] Error boundary caught:', error, errorInfo);
+    }
+    
+    render() {
+        if (this.state.hasError) {
+            return (
+                <div style={{ 
+                    color: 'red', 
+                    padding: '20px', 
+                    backgroundColor: '#222',
+                    height: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexDirection: 'column'
+                }}>
+                    <h2>🚨 3D Viewer Error</h2>
+                    <p>Error: {this.state.error?.message}</p>
+                    <button onClick={() => window.location.reload()}>Reload Page</button>
+                </div>
+            );
+        }
+        return this.props.children;
+    }
+}
+
 // 3D Model Loader Component with specific technical fixes
 function Model3D({ modelUrl }) {
     const [model, setModel] = useState(null);
