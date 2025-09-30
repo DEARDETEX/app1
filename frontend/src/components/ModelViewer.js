@@ -175,7 +175,7 @@ function TestCube() {
 // Main ModelViewer Component - HOLOGRAM ENVIRONMENT MODE
 function ModelViewer({ modelUrl, showTestCube = false }) {
     return (
-        <div style={{ width: '100%', height: '100%' }}>
+        <div style={{ width: '100%', height: '100%', minHeight: '400px', position: 'relative' }}>
             <Canvas
                 // HOLOGRAM MODE: Fixed camera position (8, 6, 8) - NO ORBIT CONTROLS
                 camera={{ 
@@ -184,12 +184,19 @@ function ModelViewer({ modelUrl, showTestCube = false }) {
                     near: 0.1,
                     far: 1000
                 }}
-                style={{ width: '100%', height: '100%', backgroundColor: '#000' }}
+                style={{ 
+                    width: '100%', 
+                    height: '100%', 
+                    minHeight: '400px',
+                    backgroundColor: '#000',
+                    display: 'block'
+                }}
                 onCreated={(state) => {
                     console.log('🎬 [HologramEnvironment] WebGL context created successfully');
                     console.log('  └─ Renderer:', state.gl.getParameter(state.gl.VERSION));
                     console.log('  └─ Fixed Camera Position:', state.camera.position);
                     console.log('  └─ Camera FOV:', state.camera.fov);
+                    console.log('  └─ Canvas size:', state.size);
                     // CRITICAL: Camera always looks at origin (0, 0, 0)
                     state.camera.lookAt(0, 0, 0);
                 }}
