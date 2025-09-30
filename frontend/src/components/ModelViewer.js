@@ -120,14 +120,8 @@ function Model3D({ modelUrl }) {
                     console.log('  └─ Scale factor:', scale);
                     console.log('  └─ Camera view: (8, 6, 8) -> (0, 0, 0)');
                     
-                    // HOLOGRAM MATERIAL: Cyan color for hologram appearance
-                    const material = new THREE.MeshPhongMaterial({ 
-                        color: 0x00ffff, // Cyan for hologram effect
-                        shininess: 100,
-                        transparent: false,
-                        opacity: 1.0,
-                        side: THREE.DoubleSide
-                    });
+                    // HOLOGRAM MATERIAL: Custom shader for hologram effects
+                    const material = createHologramMaterial();
                     
                     // Create new mesh with hologram material and positioning
                     const newMesh = new THREE.Mesh(geometry, material);
