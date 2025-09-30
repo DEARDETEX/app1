@@ -225,6 +225,25 @@ function App() {
                     >
                         {show3DViewer ? '3D Viewer ON' : '3D Viewer OFF'}
                     </button>
+                    
+                    {/* Phase 3: Video Export Controls */}
+                    <button 
+                        onClick={isRecording ? stopRecording : startRecording}
+                        disabled={!show3DViewer || (!modelUrl && !showTestCube)}
+                        style={{
+                            padding: '12px 24px',
+                            backgroundColor: isRecording ? '#ff4444' : '#00ff00',
+                            color: 'black',
+                            border: 'none',
+                            borderRadius: '4px',
+                            fontSize: '16px',
+                            fontWeight: 'bold',
+                            cursor: (!show3DViewer || (!modelUrl && !showTestCube)) ? 'not-allowed' : 'pointer',
+                            opacity: (!show3DViewer || (!modelUrl && !showTestCube)) ? 0.5 : 1
+                        }}
+                    >
+                        {isRecording ? '🔴 Recording... (' + recordingProgress + '%)' : '📹 Generate Hologram Video (15s)'}
+                    </button>
                 </div>
 
                 {/* File Info */}
