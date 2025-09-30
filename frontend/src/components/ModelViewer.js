@@ -50,10 +50,15 @@ function Model3D({ modelUrl }) {
     const [geometryBounds, setGeometryBounds] = useState(null);
     const meshRef = useRef();
     
-    // Rotation animation
-    useFrame(() => {
+    // Hologram animation with shader uniforms
+    useFrame((state) => {
         if (meshRef.current) {
             meshRef.current.rotation.y += 0.01;
+            
+            // Animate hologram shader uniforms if material has them
+            if (meshRef.current.material && meshRef.current.material.uniforms) {
+                meshRef.current.material.uniforms.time.value = state.clock.elapsedTime;
+            }
         }
     });
 
