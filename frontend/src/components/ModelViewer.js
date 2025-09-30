@@ -210,48 +210,113 @@ function TestCube() {
     );
 }
 
+// Hologram Shader Material - Phase 2 Implementation
+const createHologramMaterial = () => {
+    const hologramVertexShader = `
+        varying vec3 vNormal;
+        varying vec3 vPositionNormal;
+        varying vec2 vUv;
+        
+        void main() {
+            vUv = uv;
+            vNormal = normalize(normalMatrix * normal);
+            vPositionNormal = normalize((modelViewMatrix * vec4(position, 1.0)).xyz);
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+    `;
+
+    const hologramFragmentShader = `
+        uniform float time;
+        uniform vec3 color;
+        uniform float glowIntensity;
+        uniform float scanSpeed;
+        uniform float flickerRate;
+        
+        varying vec3 vNormal;
+        varying vec3 vPositionNormal;
+        varying vec2 vUv;
+        
+        void main() {
+            // Fresnel effect for edge glow
+            float fresnel = pow(1.0 - abs(dot(vNormal, vPositionNormal)), 2.5);
+            
+            // Scan lines effect
+            float scanline = sin(gl_FragCoord.y * 0.01 + time * scanSpeed) * 0.05 + 0.95;
+            
+            // Hologram flicker effect
+            float flicker = sin(time * flickerRate) * 0.02 + 0.98;
+            
+            // Additional hologram distortion
+            float distortion = sin(vUv.y * 20.0 + time * 2.0) * 0.01;
+            
+            // Combine effects
+            vec3 glow = color * (fresnel * glowIntensity + 0.1);
+            float alpha = (fresnel * 0.7 + 0.3) * scanline * flicker;
+            
+            gl_FragColor = vec4(glow + distortion, alpha);
+        }
+    `;
+
+    return new THREE.ShaderMaterial({
+        vertexShader: hologramVertexShader,
+        fragmentShader: hologramFragmentShader,
+        uniforms: {
+            time: { value: 0 },
+            color: { value: new THREE.Color(0x00ffff) },
+            glowIntensity: { value: 1.5 },
+            scanSpeed: { value: 5.0 },
+            flickerRate: { value: 15.0 }
+        },
+        transparent: true,
+        blending: THREE.AdditiveBlending,
+        side: THREE.DoubleSide
+    });
+};
+
 // Main ModelViewer Component - HOLOGRAM ENVIRONMENT MODE
 function ModelViewer({ modelUrl, showTestCube = false }) {
     return (
-        <div style={{ width: '100%', height: '100%', minHeight: '400px', position: 'relative' }}>
-            <Canvas
-                // HOLOGRAM MODE: Fixed camera position (8, 6, 8) - NO ORBIT CONTROLS
-                camera={{ 
-                    position: [8, 6, 8], // Fixed position as specified for hologram environment
-                    fov: 75,
-                    near: 0.1,
-                    far: 1000
-                }}
-                style={{ 
-                    width: '100%', 
-                    height: '100%', 
-                    minHeight: '400px',
-                    backgroundColor: '#000',
-                    display: 'block'
-                }}
-                onCreated={(state) => {
-                    console.log('🎬 [HologramEnvironment] WebGL context created successfully');
-                    console.log('  └─ Renderer:', state.gl.getParameter(state.gl.VERSION));
-                    console.log('  └─ Fixed Camera Position:', state.camera.position);
-                    console.log('  └─ Camera FOV:', state.camera.fov);
-                    console.log('  └─ Canvas size:', state.size);
-                    // CRITICAL: Camera always looks at origin (0, 0, 0)
-                    state.camera.lookAt(0, 0, 0);
-                }}
-            >
-                {/* HOLOGRAM ENVIRONMENT: Professional 3-Point Lighting System */}
-                <ambientLight intensity={0.3} color="#404040" />
-                <directionalLight position={[10, 10, 5]} intensity={0.8} color="#ffffff" />
-                <directionalLight position={[-5, -5, -5]} intensity={0.4} color="#4444ff" />
-                
-                {/* 3D Content positioned for hologram display */}
-                {showTestCube ? <TestCube /> : null}
-                {modelUrl && !showTestCube ? <Model3D modelUrl={modelUrl} /> : null}
-                
-                {/* NO ORBIT CONTROLS - Fixed camera for hologram environment */}
-                {/* OrbitControls removed for professional hologram setup */}
-            </Canvas>
-        </div>
+        <ErrorBoundary>
+            <div style={{ width: '100%', height: '100%', minHeight: '400px', position: 'relative' }}>
+                <Canvas
+                    // HOLOGRAM MODE: Fixed camera position (8, 6, 8) - NO ORBIT CONTROLS
+                    camera={{ 
+                        position: [8, 6, 8], // Fixed position as specified for hologram environment
+                        fov: 75,
+                        near: 0.1,
+                        far: 1000
+                    }}
+                    style={{ 
+                        width: '100%', 
+                        height: '100%', 
+                        minHeight: '400px',
+                        backgroundColor: '#000',
+                        display: 'block'
+                    }}
+                    onCreated={(state) => {
+                        console.log('🎬 [HologramEnvironment] WebGL context created successfully');
+                        console.log('  └─ Renderer:', state.gl.getParameter(state.gl.VERSION));
+                        console.log('  └─ Fixed Camera Position:', state.camera.position);
+                        console.log('  └─ Camera FOV:', state.camera.fov);
+                        console.log('  └─ Canvas size:', state.size);
+                        // CRITICAL: Camera always looks at origin (0, 0, 0)
+                        state.camera.lookAt(0, 0, 0);
+                    }}
+                >
+                    {/* HOLOGRAM ENVIRONMENT: Professional 3-Point Lighting System */}
+                    <ambientLight intensity={0.3} color="#404040" />
+                    <directionalLight position={[10, 10, 5]} intensity={0.8} color="#ffffff" />
+                    <directionalLight position={[-5, -5, -5]} intensity={0.4} color="#4444ff" />
+                    
+                    {/* 3D Content positioned for hologram display */}
+                    {showTestCube ? <TestCube /> : null}
+                    {modelUrl && !showTestCube ? <Model3D modelUrl={modelUrl} /> : null}
+                    
+                    {/* NO ORBIT CONTROLS - Fixed camera for hologram environment */}
+                    {/* OrbitControls removed for professional hologram setup */}
+                </Canvas>
+            </div>
+        </ErrorBoundary>
     );
 }
 
