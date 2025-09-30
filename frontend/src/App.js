@@ -11,6 +11,12 @@ function App() {
     const [uploadStatus, setUploadStatus] = useState('');
     const [showTestCube, setShowTestCube] = useState(true);
     const [show3DViewer, setShow3DViewer] = useState(false);
+    
+    // Phase 3: Video Export System
+    const [isRecording, setIsRecording] = useState(false);
+    const [recordingProgress, setRecordingProgress] = useState(0);
+    const mediaRecorderRef = React.useRef(null);
+    const progressIntervalRef = React.useRef(null);
 
     const handleFileSelect = async (event) => {
         const file = event.target.files[0];
