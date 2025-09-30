@@ -63,6 +63,113 @@ function App() {
         setShow3DViewer(!show3DViewer);
     };
 
+    // Phase 3: Video Export System Implementation
+    const startRecording = () => {
+        const canvas = document.querySelector('canvas');
+        if (!canvas) {
+            alert('❌ No 3D canvas found. Please ensure the 3D viewer is active.');
+            return;
+        }
+
+        try {
+            console.log('🎬 [VideoExport] Starting hologram video recording...');
+            
+            // Capture canvas stream at 30 FPS
+            const stream = canvas.captureStream(30);
+            
+            // Configure MediaRecorder with high quality settings
+            const recorder = new MediaRecorder(stream, {
+                mimeType: 'video/webm;codecs=vp9,opus',
+                videoBitsPerSecond: 2500000 // 2.5 Mbps for good quality
+            });
+
+            const chunks = [];
+            
+            recorder.ondataavailable = (event) => {
+                if (event.data.size > 0) {
+                    chunks.push(event.data);
+                }
+            };
+
+            recorder.onstop = () => {
+                console.log('🎬 [VideoExport] Recording completed, creating video blob...');
+                const blob = new Blob(chunks, { type: 'video/webm' });
+                const url = URL.createObjectURL(blob);
+
+                // Trigger automatic download
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = `hologram_${Date.now()}.webm`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+
+                console.log('✅ [VideoExport] Hologram video downloaded successfully!');
+                setIsRecording(false);
+                setRecordingProgress(0);
+                
+                if (progressIntervalRef.current) {
+                    clearInterval(progressIntervalRef.current);
+                }
+            };
+
+            recorder.onerror = (event) => {
+                console.error('❌ [VideoExport] Recording error:', event.error);
+                setIsRecording(false);
+                setRecordingProgress(0);
+                alert('❌ Recording failed: ' + event.error.message);
+                
+                if (progressIntervalRef.current) {
+                    clearInterval(progressIntervalRef.current);
+                }
+            };
+
+            // Start recording
+            recorder.start();
+            mediaRecorderRef.current = recorder;
+            setIsRecording(true);
+            setRecordingProgress(0);
+
+            // Progress tracking (15 second recording)
+            const recordingDuration = 15000; // 15 seconds
+            const progressUpdateInterval = 100; // Update every 100ms
+            let startTime = Date.now();
+
+            progressIntervalRef.current = setInterval(() => {
+                const elapsed = Date.now() - startTime;
+                const progress = Math.min((elapsed / recordingDuration) * 100, 100);
+                setRecordingProgress(Math.round(progress));
+
+                if (elapsed >= recordingDuration) {
+                    if (mediaRecorderRef.current?.state === 'recording') {
+                        mediaRecorderRef.current.stop();
+                    }
+                    clearInterval(progressIntervalRef.current);
+                }
+            }, progressUpdateInterval);
+
+            console.log('🎬 [VideoExport] Recording started - 15 second hologram video');
+
+        } catch (error) {
+            console.error('❌ [VideoExport] Failed to start recording:', error);
+            alert('❌ Failed to start recording: ' + error.message);
+            setIsRecording(false);
+        }
+    };
+
+    const stopRecording = () => {
+        if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+            mediaRecorderRef.current.stop();
+            console.log('🛑 [VideoExport] Recording stopped manually');
+        }
+        
+        if (progressIntervalRef.current) {
+            clearInterval(progressIntervalRef.current);
+        }
+    };
+
     return (
         <div style={{ 
             width: '100vw', 
