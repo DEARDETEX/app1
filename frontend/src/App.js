@@ -264,6 +264,37 @@ function App() {
                         {uploadStatus}
                     </div>
                 )}
+
+                {/* Phase 3: Recording Progress Indicator */}
+                {isRecording && (
+                    <div style={{ marginTop: '10px' }}>
+                        <div style={{ 
+                            width: '100%', 
+                            height: '6px', 
+                            backgroundColor: '#333',
+                            borderRadius: '3px',
+                            overflow: 'hidden',
+                            border: '1px solid #00ffff'
+                        }}>
+                            <div style={{
+                                width: `${recordingProgress}%`,
+                                height: '100%',
+                                backgroundColor: '#00ff00',
+                                transition: 'width 0.1s ease',
+                                boxShadow: '0 0 10px rgba(0, 255, 0, 0.5)'
+                            }} />
+                        </div>
+                        <p style={{ 
+                            fontSize: '12px', 
+                            color: '#00ffff', 
+                            marginTop: '5px',
+                            textAlign: 'center',
+                            fontWeight: 'bold'
+                        }}>
+                            🎬 Recording hologram video... {recordingProgress}% ({Math.round(recordingProgress * 0.15)}s / 15s)
+                        </p>
+                    </div>
+                )}
             </div>
 
             {/* 3D Viewer Area */}
